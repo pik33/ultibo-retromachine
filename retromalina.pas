@@ -1,6 +1,6 @@
 // *****************************************************************************
 // The retromachine unit for Raspberry Pi/Ultibo
-// Ultibo v. 0.02 - 2016.11.19
+// Ultibo v. 0.03 - 2016.11.19
 // Piotr Kardasz
 // pik33@o2.pl
 // www.eksperymenty.edu.pl
@@ -2041,29 +2041,24 @@ end;
 
 procedure pwmbeep;
 
-var sinus:array[0..4095] of cardinal;
-    i:integer;
+var i:integer;
     ctrlblock:array[0..7] of cardinal;
 
 begin
-for i:=0 to 4095 do sinus[i]:=round(1040+1024*(sin(2*pi*i/512)));
 
 ctrlblock[0]:=$07050140; //transfer info
-ctrlblock[1]:=$c8000000;
+ctrlblock[1]:=$c205a000;
 ctrlblock[2]:=$7E20C018;
-ctrlblock[3]:=$4000;
+ctrlblock[3]:=7680;
 ctrlblock[4]:=$0;
 ctrlblock[5]:=$c4000020;
 ctrlblock[6]:=$0;
 ctrlblock[7]:=$0;
 for i:=0 to 7 do lpoke($4000000+4*i,ctrlblock[i]);
 ctrlblock[5]:=$c4000000;
-ctrlblock[1]:=$c8004000;
+ctrlblock[1]:=$c205c000;
 for i:=0 to 7 do lpoke($4000020+4*i,ctrlblock[i]);
-for i:=0 to 4095 do lpoke ($8000000+4*i,sinus[i]);
-for i:=0 to 4095 do lpoke ($8004000+4*i,sinus[i]);
-for i:=0 to 4095 do lpoke ($8008000+4*i,sinus[2*(i mod 2048)]);
-for i:=0 to 4095 do lpoke ($800C000+4*i,sinus[2*(i mod 2048)]);
+for i:=0 to 16383 do lpoke ($0205a000+i,0);
 CleanDataCacheRange($8000000,$10000);
 CleanDataCacheRange($4000000,$10000);
 sleep(1);
@@ -2071,7 +2066,7 @@ sleep(1);
 
 //set gpio
 i:=pinteger($3F200010)^ and  %11111111111111000111111111111000;
-lpoke($3F200010, i or       %00000000000000100000000000000100); // gpio 40/45 as alt0
+lpoke($3F200010, i or        %00000000000000100000000000000100); // gpio 40/45 as alt0
 lpoke($3F1010a0,$5a000016); // set clock to pll D    16 plld
 lpoke($3F1010a4,$5a002000); // div 5
 lpoke($3F20C010,5669); // pwm 1 range  11bit 48 khz 2083

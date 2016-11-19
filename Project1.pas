@@ -151,7 +151,7 @@ cls(147);
 
 initsprites;
 
-outtextxyz(128,16,'The Ultibo Retromachine v. 0.02 --- 2016.11.14',156,4,2);
+outtextxyz(128,16,'The Ultibo Retromachine v. 0.03 --- 2016.11.19',156,4,2);
 outtextxyz(64,128,'We have Atari ST - like font', 156,2,2);
 outtextxyz(64,192,'The font can be scaled',232,8,4);
 
@@ -160,8 +160,8 @@ for i:=0 to 15 do
     box(64+32*j,320+32*i,32,32,16*i+j);
 
 
-outtextxyz(64,864,'We have Atari 8-bit - like pallette...', 106,2,2);
-outtextxyz(64,896,'... and 8 scalable 32x32 pixel sprites.', 44,2,2);
+outtextxyz(64,860,'We have Atari 8-bit - like pallette...', 168,2,2);
+outtextxyz(64,900,'... and 8 scalable 32x32 pixel sprites.', 184,2,2);
 
 lpoke($206000c,$002040);   // border
 sethidecolor(250,0,$FF);
@@ -252,11 +252,9 @@ a:=lpeek($2060000);
 
     if (peek($206002b) and 1)>0 then
     begin
-    poke($206002b,0);
-
-    box(64,950,1000,32,147);
-    if (peek($206002b) and 2)=0 then outtextxyz(64,950,'Pressed key '+char(peek($60028))+', key code '+inttohex(lpeek($2060028),8),27,2,2)
-    else outtextxyz(64,950,'Pressed special key '+inttostr(peek($2060028))+', key code '+inttohex(lpeek($2060028),8),27,2,2);
+    box(64,960,1000,32,147);
+    if (peek($206002b) and 2)=0 then outtextxyz(64,960,'Pressed key '+char(peek($2060028))+', key code '+inttohex(lpeek($2060028),8),152,2,2)
+    else outtextxyz(64,960,'Pressed special key '+inttostr(peek($2060028))+', key code '+inttohex(lpeek($2060028),8),152,2,2);
     poke($206002b,0);
     end;
     fps:=(100000000*aa) div (clockgettotal-b64);
@@ -265,15 +263,13 @@ a:=lpeek($2060000);
     a:= lpeek($3F007800) ;
     if (a and 2)<>0
        then begin
-       il:=fileread(fh,buf[0],8192);
-       if il<>8192 then begin fileseek(fh,44,0);  fileread(fh,buf[0],8192); end;
-       if lpeek($3f00781c)=$c4000000 then for i:=0 to 4095 do lpoke($8000000+4*i, (32768+buf[i]) div 12)
-       else for i:=0 to 4095 do lpoke($8004000+4*i,(32768+buf[i]) div 12) ;
-       lpoke($3F007800,3);    inc(aa);   CleanDataCacheRange($8000000,$10000);  end;
-       outtextxyz(600,600,inttostr(fh)+' '+inttohex(lpeek($3f00781c),8)+ ' '+inttostr(il),15,2,2);
-  tt:=clockgettotal;
-  box(64,1000,1500,32,147);
-  tt:=clockgettotal-tt;
+       il:=fileread(fh,buf[0],3840);
+       if il<>3840 then begin fileseek(fh,44,0);  fileread(fh,buf[0],3840); end;
+       if lpeek($3f00781c)=$c4000000 then for i:=0 to 1919 do lpoke($0205a000+4*i, (32768+buf[i]) div 12)
+       else for i:=0 to 1919 do lpoke($0205c000+4*i,(32768+buf[i]) div 12) ;
+       lpoke($3F007800,3);    inc(aa);   CleanDataCacheRange($0205a000,$8000);  end;
+
+
   for i:=59 downto 1 do times[i]:=times[i-1];
   times[0]:=ts;
   a64:=0;
@@ -282,16 +278,36 @@ a:=lpeek($2060000);
   fps:=lpeek($2060000);
   fps:=100000000*fps;
   fps:=fps div (clockgettotal-b64);
-  outtextxyz(64,1000,inttostr(lpeek($2060000))+' frames generated, '+inttostr(a64) +' us per frame, '+floattostr(fps/100)+' fps '+inttostr(tt) + ' - press esc to reboot.',15,2,2);
-  CleanDataCacheRange($5000000,2000000);
-  box(600,640,600,32,147);
-  outtextxyz(600,640,'CPU temperature: ',15,2,2);
+  tt:=clockgettotal;
+  box(600,320,1000,512,147);
+  tt:=clockgettotal-tt;
+  outtextxyz(1028,320,inttostr(lpeek($2060000)),26,2,2);
+  outtextxyz(600,320,'Frames generated: ', 26,2,2);
+  outtextxyz(1028,360,inttostr(a64),42,2,2);
+  outtextxyz(600,360,'us per frame: ',42,2,2);
+  outtextxyz(600,400,'fps: ',58,2,2);
+  outtextxyz(1028,400,floattostr(fps/100)+' fps ',58,2,2);
+  outtextxyz(600,440,'us for 1000x512 pixel box:',74,2,2);
+  outtextxyz(1028,440,inttostr(tt),74,2,2);
+  outtextxyz(600,480,'CPU temperature: ',90,2,2);
+  outtextxyz(600,520, 'Audio file handle: ',108,2,2);
+  outtextxyz(1028,520,inttostr(fh),108,2,2);
+  outtextxyz(600,560, 'DMA control block: ',122,2,2);
+  outtextxyz(1028,560, inttohex(lpeek($3f00781c),8),122,2,2);
+  outtextxyz(600,600, 'Bytes loaded from file:',138,2,2);
+  outtextxyz(1028,600, inttostr(il),138,2,2);
+
+
+
   a:= TemperatureGetCurrent(0) div 1000;
-  if a<70 then c:=184
+  if a<75 then c:=184
   else if a<80 then c:=232
   else if a<85 then c:=24
   else c:=40;
-  outtextxyz(900,640,inttostr(a)+'C',c,2,2);
+  outtextxyz(1028,480,inttostr(a)+'C',c,2,2);
+  CleanDataCacheRange($3000000,2000000);
+
+  outtextxyz(64,1040,'Press esc to reboot.',15,2,2);
 until (peek($2060028)=27); //or (lpeek($60000)>1200);
 
 //cls(143);

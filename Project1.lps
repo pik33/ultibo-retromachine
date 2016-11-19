@@ -7,7 +7,6 @@
       <Unit0>
         <Filename Value="Project1.pas"/>
         <IsPartOfProject Value="True"/>
-        <IsVisibleTab Value="True"/>
         <TopLine Value="45"/>
         <CursorPos X="23" Y="60"/>
         <UsageCount Value="49"/>
@@ -69,9 +68,10 @@
       </Unit7>
       <Unit8>
         <Filename Value="retromalina.pas"/>
+        <IsVisibleTab Value="True"/>
         <EditorIndex Value="4"/>
-        <TopLine Value="615"/>
-        <CursorPos X="8" Y="628"/>
+        <TopLine Value="2024"/>
+        <CursorPos X="5" Y="2044"/>
         <UsageCount Value="18"/>
         <Loaded Value="True"/>
       </Unit8>
