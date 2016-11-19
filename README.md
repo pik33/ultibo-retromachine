@@ -3,3 +3,4 @@ Early alpha stage 0.02
 
 Version 0.02 will play a '1.wav' file placed on SD boot partition while displaying some more or less useless information and moving sprites
 
+Place a 'retro' folder on SD boot partion.
