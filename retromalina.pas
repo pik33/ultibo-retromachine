@@ -181,7 +181,8 @@ function slpeek(addr:integer):integer;
 procedure sethidecolor(c,bank,mask:integer);
 procedure putcharz(x,y:integer;ch:char;col,xz,yz:integer);
 procedure outtextxyz(x,y:integer; t:string;c,xz,yz:integer);
-procedure scrollup;
+//procedure scrollup;
+//procedure scrollup6;
 function sid(mode:integer):tsample;
 procedure pwmbeep;
 procedure sdl_pauseaudio(mode:integer);   // instead of the real one
@@ -1179,15 +1180,6 @@ var i:integer;
 
 begin
 for i:=0 to length(t)-1 do putcharz(x+8*xz*i,y,t[i+1],c,xz,yz);
-end;
-
-procedure scrollup;
-
-var i:integer;
-
-begin
-  blit(lpeek($2060004),0,32,lpeek($2060004),0,0,1792,1088,1792,1792);
-  box(0,1088,1792,32,147);
 end;
 
 

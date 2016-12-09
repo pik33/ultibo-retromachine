@@ -51,6 +51,7 @@ var s,currentdir,currentdir2:string;
     key:byte=0;
     gcx,gcy:integer;
     gc:integer=156;
+    grmode:byte=0;
 
 // ---- procedures
 
@@ -216,6 +217,17 @@ begin
  lpoke($20600a0,(ty shl 16)+tx);
 end;
 
+procedure scrollup;
+
+var i:integer;
+
+begin
+  if grmode=0 then blit(lpeek($2060004),0,32,lpeek($2060004),0,0,1792,1088,1792,1792)
+  else  blit(lpeek($2060004),0,960,lpeek($2060004),0,928,1792,160,1792,1792);
+  box(0,1088,1792,32,147);
+end;
+
+
 procedure crlf;
 
 begin
@@ -336,9 +348,83 @@ except
 end;
 end;
 
+procedure bpoke(arg1,arg2:string);
+
+var arg1i, arg2i:integer;
+
+begin
+
+try
+  arg1i:=strtoint(arg1);
+  arg2i:=strtoint(arg2);
+    begin
+    poke (arg1i, arg2i);
+    end;
+except
+  print('ERROR - poke arguments have to be integer. Use poke addr,byte ');
+
+end;
+end;
+
+
+procedure blpoke(arg1,arg2:string);
+
+var arg1i, arg2i:integer;
+
+begin
+
+try
+  arg1i:=strtoint(arg1);
+  arg2i:=strtoint(arg2);
+    begin
+    lpoke (arg1i, arg2i);
+    end;
+except
+  print('ERROR - lpoke arguments have to be integer. Use lpoke addr,byte ');
+
+end;
+end;
+
+
+procedure border(arg1,arg2,arg3:string);
+
+var arg1i, arg2i, arg3i:integer;
+
+begin
+
+try
+  arg1i:=strtoint(arg1);
+  if arg3<>'' then arg2i:=strtoint(arg2);
+  if arg3<>'' then arg3i:=strtoint(arg3);
+    begin
+    if (arg2<>'') and (arg3<>'') then lpoke($206000c, arg3i+arg2i*256+arg1i*65536)
+    else lpoke ($206000c,lpeek($2010000+4*arg1i));
+    end;
+except
+  print('ERROR - border arguments have to be integer. Use border color or border r,g,b ');
+
+end;
+end;
+
+procedure graphics(arg1:string);
+
+var arg1i:integer;
+
+begin
+
+try
+  arg1i:=strtoint(arg1);
+  grmode:=arg1i;
+
+except
+  print('ERROR - graphics argument has to be integer. ');
+
+end;
+end;
+
 procedure interpret(line:TBasicLine; len:integer);
 
-label p999, p998, p997;
+label p999, p998, p997, p996;
 
 var i:integer;
     command, arg1,arg2,arg3,arg4,arg5,arg6,arg7,arg8: string;
@@ -362,7 +448,7 @@ if (line[i]>=48) and (line[i]<57) then
   goto p999;
   end;
 
-while (line[i]>32) and (line[i]<125) do
+while (line[i]>32) and (line[i]<125) and  (line[i]<>44) and (line[i]<>61) do
   begin
   command+=chr(line[i]);
   i+=1;
@@ -370,6 +456,8 @@ while (line[i]>32) and (line[i]<125) do
   end;
   command:=lowercase(command);
 
+while line[i]=32 do i+=1;
+if (line[i]=61) then goto p996;
 while line[i]=32 do i+=1;
 
 while (line[i]>32) and (line[i]<125) and (line[i]<>44) do
@@ -461,7 +549,16 @@ if (command='plot') or (command='pl.') then begin plot(arg1,arg2); goto p999; en
 if (command='drawto') or (command='dr.') then begin drawto(arg1,arg2); goto p999; end;
 if (command='sound') or (command='so.') then begin print('Command: sound'); goto p999; end;
 if (command='circle') or (command='ci.') then begin bcircle(arg1,arg2,arg3,arg4); goto p999; end;
+if (command='poke') or (command='p.') then begin bpoke(arg1,arg2); goto p999; end;
+if (command='lpoke') or (command='lp.') then begin blpoke(arg1,arg2); goto p999; end;
+if (command='border') then begin border(arg1,arg2,arg3); goto p999; end;
+if (command='graphics') or (command='gr.') then begin graphics(arg1); goto p999; end;
+
 goto p997;
+
+p996:
+print('LET command detected');
+goto p999;
 
 p998:
 print('ERROR - use "," to separate arguments');
@@ -473,7 +570,7 @@ print(line);
 print('"');
 
 p999:
-crlf;
+//crlf;
 end;
 
 
