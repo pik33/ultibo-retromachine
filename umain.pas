@@ -6,7 +6,7 @@ interface
 
 uses sysutils,classes,retromalina,platform;
 
-const ver='Chuj!';
+const ver='0';
 var test:integer ;
     licznik:integer=0;
     songname:string;
